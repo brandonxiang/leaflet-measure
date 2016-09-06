@@ -7104,6 +7104,7 @@ L.Control.Measure = L.Control.extend({
       this._addMeasureBoundary(this._latlngs);
 
       this._measureVertexes.eachLayer(function (layer) {
+        layer.closeTooltip();
         layer.setStyle(vertexSymbol);
         // reset all vertexes to non-active class - only last vertex is active
         // `layer.setStyle({ className: 'layer-measurevertex'})` doesn't work. https://github.com/leaflet/leaflet/issues/2662
@@ -7132,7 +7133,11 @@ L.Control.Measure = L.Control.extend({
   },
   // add various measure graphics to map - vertex, area, boundary
   _addNewVertex: function (latlng) {
-    L.circleMarker(latlng, this._symbols.getSymbol('measureVertexActive')).addTo(this._measureVertexes);
+    var vertex = L.circleMarker(latlng, this._symbols.getSymbol('measureVertexActive'));
+    vertex.bindTooltip(this.$results, {
+      permanent: true
+    });
+    vertex.addTo(this._measureVertexes);
   },
   _addMeasureArea: function (latlngs) {
     if (latlngs.length < 3) {
