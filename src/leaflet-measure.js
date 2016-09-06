@@ -55,6 +55,7 @@ L.Control.Measure = L.Control.extend({
     this.options.units = L.extend({}, units, this.options.units);
     this._symbols = new Symbology(_.pick(this.options, 'activeColor', 'completedColor'));
     i18n.setLocale(this.options.localization);
+    this._toggleBtn = false;
   },
   onAdd: function (map) {
     this._map = map;
@@ -103,22 +104,32 @@ L.Control.Measure = L.Control.extend({
     this._collapse();
     this._updateMeasureNotStarted();
 
-    if (!L.Browser.android) {
-      L.DomEvent.on(container, 'mouseenter', this._expand, this);
-      L.DomEvent.on(container, 'mouseleave', this._collapse, this);
-    }
+    // if (!L.Browser.android) {
+    //   L.DomEvent.on(container, 'mouseenter', this._expand, this);
+    //   L.DomEvent.on(container, 'mouseleave', this._collapse, this);
+    // }
     L.DomEvent.on($toggle, 'click', L.DomEvent.stop);
-    if (L.Browser.touch) {
-      L.DomEvent.on($toggle, 'click', this._expand, this);
+    L.DomEvent.on($toggle, 'click', this._toggle, this);
+    // if (L.Browser.touch) {
+    //   L.DomEvent.on($toggle, 'click', this._expand, this);
+    // } else {
+    //   L.DomEvent.on($toggle, 'focus', this._expand, this);
+    // }
+    // L.DomEvent.on($start, 'click', L.DomEvent.stop);
+    // L.DomEvent.on($start, 'click', this._startMeasure, this);
+    // L.DomEvent.on($cancel, 'click', L.DomEvent.stop);
+    // L.DomEvent.on($cancel, 'click', this._finishMeasure, this);
+    // L.DomEvent.on($finish, 'click', L.DomEvent.stop);
+    // L.DomEvent.on($finish, 'click', this._handleMeasureDoubleClick, this);
+  },
+  _toggle: function () {
+    if (this._toggleBtn) {
+      this._removeAllMeasure();
+      this._toggleBtn = false;
     } else {
-      L.DomEvent.on($toggle, 'focus', this._expand, this);
+      this._startMeasure();
+      this._toggleBtn = true;
     }
-    L.DomEvent.on($start, 'click', L.DomEvent.stop);
-    L.DomEvent.on($start, 'click', this._startMeasure, this);
-    L.DomEvent.on($cancel, 'click', L.DomEvent.stop);
-    L.DomEvent.on($cancel, 'click', this._finishMeasure, this);
-    L.DomEvent.on($finish, 'click', L.DomEvent.stop);
-    L.DomEvent.on($finish, 'click', this._handleMeasureDoubleClick, this);
   },
   _expand: function () {
     dom.hide(this.$toggle);
@@ -231,6 +242,15 @@ L.Control.Measure = L.Control.extend({
     this._measureDrag = null;
     this._measureArea = null;
     this._measureBoundary = null;
+  },
+  _removeAllMeasure: function () {
+    var layer = this._layer;
+    var layers = layer._layers;
+    for (var i in layers) {
+      if (layers.hasOwnProperty(i)) {
+        layer.removeLayer(layers[i]);
+      }
+    }
   },
   // centers the event capture marker
   _centerCaptureMarker: function () {
