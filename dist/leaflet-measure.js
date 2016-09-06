@@ -7002,6 +7002,19 @@ L.Control.Measure = L.Control.extend({
         humanize.numberFormat(val, 0, decPoint || i18n.__('decPoint'), thousandsSep || i18n.__('thousandsSep'));
     }
   },
+  _readMeasure: function (latlng) {
+    this._latlngs.push(latlng);
+    var calced = calc.measure(this._latlngs);
+    var resultsModel = this._resultsModel = _.extend({}, calced, this._getMeasurementDisplayStrings(calced), {
+      pointCount: this._latlngs.length
+    });
+    this.$results.innerHTML = resultsTemplate({
+      model: resultsModel,
+      humanize: humanize,
+      i18n: i18n
+    });
+    this._latlngs.pop();
+  },
   // update results area of dom with calced measure from `this._latlngs`
   _updateResults: function () {
     var calced = calc.measure(this._latlngs);
@@ -7019,9 +7032,13 @@ L.Control.Measure = L.Control.extend({
   _handleMeasureMove: function (evt) {
     if (!this._measureDrag) {
       this._measureDrag = L.circleMarker(evt.latlng, this._symbols.getSymbol('measureDrag')).addTo(this._layer);
+      this._measureDrag.bindTooltip(this.$results, {
+        permanent: true
+      });
     } else {
       this._measureDrag.setLatLng(evt.latlng);
     }
+    this._readMeasure(evt.latlng);
     this._measureDrag.bringToFront();
   },
   // handler for both double click and clicking finish button
@@ -7134,9 +7151,9 @@ L.Control.Measure = L.Control.extend({
   // add various measure graphics to map - vertex, area, boundary
   _addNewVertex: function (latlng) {
     var vertex = L.circleMarker(latlng, this._symbols.getSymbol('measureVertexActive'));
-    vertex.bindTooltip(this.$results, {
-      permanent: true
-    });
+    // vertex.bindTooltip(this.$results, {
+    //   permanent: true
+    // });
     vertex.addTo(this._measureVertexes);
   },
   _addMeasureArea: function (latlngs) {
