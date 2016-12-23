@@ -19,7 +19,7 @@ module.exports = {
   'centerOnLocation': '该位置居中',
   'cancel': '取消',
   'delete': '删除',
-  'acres': '公亩',
+  'acres': '英亩',
   'feet': '英尺',
   'kilometers': '公里',
   'hectares': '公顷',
